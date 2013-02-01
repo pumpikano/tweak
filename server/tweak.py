@@ -38,9 +38,9 @@ class ControlWebSocket(websocket.WebSocketHandler):
 static_path = os.path.join(os.getcwd(), 'static')
 
 application = tornado.web.Application([
-    (r'/psh', MainHandler),
+    (r'/', MainHandler),
     (r'/static/(.*)', tornado.web.StaticFileHandler, {'path': static_path}),
-    (r'/', ClientWebSocket),
+    (r'/client', ClientWebSocket),
     (r'/control', ControlWebSocket)
 ], debug=True)
 

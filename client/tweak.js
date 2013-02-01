@@ -11,7 +11,7 @@
     // Setup websocket
     var _ws;
     if ('WebSocket' in window) {
-        _ws = new WebSocket('ws://' + _settings.domain + ':' + _settings.port);
+        _ws = new WebSocket('ws://' + _settings.domain + ':' + _settings.port + '/client');
         _ws.onopen = _onOpen;
         _ws.onmessage = _receiveMessage;
     } else {
@@ -53,12 +53,12 @@
 
 
     function _executeCommand(data) {
-        var key = data['key'];
+        var name = data['name'];
         var value = data['value'];
-        console.log(key + ' ' + value);
+        console.log(name + ' ' + value);
 
-        if (_has(boundParams, key)) {
-            _inject(key, value)
+        if (_has(_boundVariables, name)) {
+            _inject(name, value)
         }
     }
 
@@ -70,7 +70,7 @@
 
     function _createBindingRecord(property) {
         return {
-                 'alias': null,
+                 'name': null,
                  'property': property,
                  'ref': null,
                  'high': 1,
@@ -79,8 +79,9 @@
             };
     }
 
-    function _inject(property, val) {
-        _boundVariables[property][property] = val;
+    function _inject(name, value) {
+        var record = _boundVariables[name];
+        record.ref[record.property] = value;
     }
     
     /* Helpers */
@@ -131,8 +132,8 @@
 
     function _createChainable(record) {
         return {
-            aliased: function (alias) {
-                record.alias = alias;
+            nameed: function (name) {
+                record.name = name;
                 delete this.aliased;
                 return this;
             },
@@ -175,8 +176,8 @@
         var chainable = _createChainable(record);
         setTimeout(function () {
             if (_assert(record.ref !== null || record.fn !== undefined, 'Tweak statement must specify one of either .in() or .do().')) {
-                record.alias = record.alias || record.property;
-                _boundVariables[record.alias] = record;
+                record.name = record.name || record.property;
+                _boundVariables[record.name] = record;
             }
         }, 0);
         return chainable;

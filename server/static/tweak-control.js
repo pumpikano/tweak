@@ -51,7 +51,7 @@ function sliderChange(slider) {
 
     _sendMessage({
         'command': {
-            'key': slider.name,
+            'name': slider.name,
             'value': slider.value
         }
     });
