@@ -1,21 +1,24 @@
-var _settings = {
+var _config = {
     domain: '0.0.0.0',
     port: '8888'
 };
 
-// Setup websocket
-var _ws;
-if ('WebSocket' in window) {
-    _ws = new WebSocket('ws://' + _settings.domain + ':' + _settings.port + '/control');
-    // _ws.onopen = _onOpen;
-    _ws.onmessage = _receiveMessage;
-} else {
-    alert('WebSocket not supported');                                
-}
+/* Setup connection */
 
-// $(window).unload(function(event) {
-//     _ws.close();
-// });
+var _ws = null;
+(function _initConnection() {
+    if ('WebSocket' in window) {
+        _ws = new WebSocket('ws://' + _config.domain + ':' + _config.port + '/control');
+        // _ws.onopen = _onOpen;
+        _ws.onmessage = _receiveMessage;
+    } else {
+        alert('Cannot run Tweak because WebSocket is not supported');
+    }
+})();
+
+$(window).unload(function(event) {
+    _ws.close();
+});
 
 /* Communication */
 
@@ -25,48 +28,52 @@ function _receiveMessage(msg) {
 }
 
 function _sendMessage(data) {
-
     _ws.send(JSON.stringify(data));
-
-    
-    // if (_ws.readyState === 0) {
-    //     _messageBuffer.push(data);
-    // } else if (_ws.readyState === 1) {
-    //     _ws.send(JSON.stringify(data));
-    // }
 }
 
+/* Data */
 
+var _bindingRecords = {};
+window.bv = _bindingRecords;
+function _storeBindingRecord(record) {
+    _bindingRecords[record.name] = record;
+}
 
-function sliderChange(slider) {
+/* Interaction */
 
+function _widgetEventDispatcher(event) {
     _sendMessage({
         'command': {
-            'name': slider.name,
-            'value': slider.value
+            'name': event.name,
+            'value': event.value
         }
     });
 }
+window.widgetEventDispatcher = _widgetEventDispatcher;
+
+/* Widget Rendering */
 
 function _getTemplate(type) {
-    return '<input type="range" name="{{name}}" min="{{low}}" max="{{high}}" value="{{value}}" onchange="sliderChange(this)">';
+    return '<input type="range" name="{{name}}" min="{{low}}" max="{{high}}" value="{{value}}" data-type="{{type}}" onchange="widgetEventDispatcher(this)">';
 }
 
 function _renderBinding(binding) {
     var template = _getTemplate(binding.type);
     var html = Mustache.render(template, binding);
     $(html).appendTo('body');
-    // console.log(node);
 }
 
 $(function () {
-    _renderBinding({
+
+    var binding = {
         'type': 'int', 
         'name': 'max',
         'low': 0,
         'high': 900,
         'value': 600
-    });
+    };
+    _storeBindingRecord(binding);
+    _renderBinding(binding);
 });
 
 
