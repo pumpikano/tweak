@@ -53,14 +53,20 @@ window.widgetEventDispatcher = _widgetEventDispatcher;
 
 /* Widget Rendering */
 
-function _getTemplate(type) {
-    return '<input type="range" name="{{name}}" min="{{low}}" max="{{high}}" value="{{value}}" data-type="{{type}}" onchange="widgetEventDispatcher(this)">';
+function _renderBinding(binding) {
+    _getTemplateForType(binding.type)
+        .done(function (template) {
+            var html = Mustache.render(template, binding);
+            $(html).appendTo('body');
+        });
 }
 
-function _renderBinding(binding) {
-    var template = _getTemplate(binding.type);
-    var html = Mustache.render(template, binding);
-    $(html).appendTo('body');
+function _getTemplateForType(type) {
+    return $.ajax({
+        url: 'http://' + _config.domain + ':' + _config.port + '/templates/' + type + '.html',
+        dataType: 'html',
+        type: 'get'
+    });
 }
 
 $(function () {

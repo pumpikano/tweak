@@ -79,6 +79,7 @@ application = tornado.web.Application([
     (r'/lib/(.*)', tornado.web.StaticFileHandler, {'path': os.path.join(os.getcwd(), 'lib')}),
     (r'/scripts/(.*)', tornado.web.StaticFileHandler, {'path': os.path.join(os.getcwd(), 'scripts')}),
     (r'/css/(.*)', tornado.web.StaticFileHandler, {'path': os.path.join(os.getcwd(), 'css')}),
+    (r'/templates/(.*)', tornado.web.StaticFileHandler, {'path': os.path.join(os.getcwd(), 'templates')}),
     (r'/client', ClientWebSocket),
     (r'/control', ControlWebSocket)
 ], debug=True)
