@@ -196,6 +196,13 @@
         }
     };
 
+    Tweak.comm = {};
+    Tweak.comm.sendMessage = function (data) {
+        var msg = {};
+        msg['client'] = data;
+        _sendMessage(msg);
+    };
+
     /* Helpers */
 
     function _has(obj, property) {

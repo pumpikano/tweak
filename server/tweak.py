@@ -3,37 +3,67 @@ import tornado.ioloop
 import tornado.web
 import tornado.websocket as websocket
 
-client = None
+
+class Synchronizer(object):
+    def __init__(self):
+        self.client_websocket = None
+        self.control_websocket = None
+
+    def set_client_websocket(self, client_ws):
+        self.client_websocket = client_ws
+
+    def set_control_websocket(self, control_ws):
+        self.control_websocket = control_ws
+
+    def client_message(self, message):
+        print 'Client Message:'
+        print message
+        
+        if self.control_websocket:
+            self.control_websocket.write_message(message)
+
+    def control_message(self, message):
+        print 'Control Message:'
+        print message
+
+        if self.client_websocket:
+            self.client_websocket.write_message(message)
+
+sync = Synchronizer()
+
+# Route Classes #
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
         self.write(open('./static/index.html', 'r').read())
 
+# WebSocket Routes #
+
 class ClientWebSocket(websocket.WebSocketHandler):
     def open(self):
-        global client
-        client = self
-        print "Client websocket opened"
+        global sync
+        sync.set_client_websocket(self)
 
     def on_message(self, message):
-        self.write_message(message)
+        global sync
+        sync.client_message(message)
 
     def on_close(self):
-        client = None
-        print "Client websocket closed"
+        global sync
+        sync.set_client_websocket(None)
 
 class ControlWebSocket(websocket.WebSocketHandler):
     def open(self):
-        print "Control websocket opened"
+        global sync
+        sync.set_control_websocket(self)
 
     def on_message(self, message):
-        print message
-        if client:
-            client.write_message(message)
-        # self.write_message(message)
+        global sync
+        sync.control_message(message)
 
     def on_close(self):
-        print "Control websocket closed"
+        global sync
+        sync.set_control_websocket(None)
 
 static_path = os.path.join(os.getcwd(), 'static')
 
