@@ -1,23 +1,26 @@
 
 
 
-;(function () {
+;(function (undefined) {
 
-    var _settings = {
+    var _config = {
         domain: '0.0.0.0',
         port: '8888'
     };
 
-    // Setup websocket
-    var _ws;
-    if ('WebSocket' in window) {
-        _ws = new WebSocket('ws://' + _settings.domain + ':' + _settings.port + '/client');
-        _ws.onopen = _onOpen;
-        _ws.onmessage = _receiveMessage;
-    } else {
-        alert('WebSocket not supported');
-    }
+    /* Setup connection */
 
+    var _ws = null;
+    function _initConnection() {
+        if ('WebSocket' in window) {
+            _ws = new WebSocket('ws://' + _config.domain + ':' + _config.port + '/client');
+            _ws.onopen = _onOpen;
+            _ws.onmessage = _receiveMessage;
+        } else {
+            alert('Cannot run Tweak because WebSocket is not supported');
+        }
+    }
+    
     $(window).unload(function(event) {
         _ws.close();
     });
@@ -26,7 +29,11 @@
 
     var _messageBuffer = [];
     function _onOpen() {
+
+        // Send connection ack
         _sendMessage({'event': {'type': 'startup'}});
+
+        // Send any messages that might have been 
         for (var i = 0; i < _messageBuffer.length; i++) {
             _sendMessage(_messageBuffer[i]);
         }
@@ -34,34 +41,23 @@
     }
 
     function _receiveMessage(msg) {
-
         var data = JSON.parse(msg.data);
 
         if (_has(data, 'command')) {
             _executeCommand(data['command']);
         }
-
     }
 
     function _sendMessage(data) {
+        // If we haven't opened a connection yet, buffer the message
         if (_ws.readyState === 0) {
             _messageBuffer.push(data);
+
+        // Otherwise send the message now
         } else if (_ws.readyState === 1) {
             _ws.send(JSON.stringify(data));
         }
     }
-
-
-    function _executeCommand(data) {
-        var name = data['name'];
-        var value = data['value'];
-        console.log(name + ' ' + value);
-
-        if (_has(_boundVariables, name)) {
-            _inject(name, value)
-        }
-    }
-
 
     /* Binding Data */
 
@@ -83,33 +79,28 @@
         var record = _boundVariables[name];
         record.ref[record.property] = value;
     }
-    
-    /* Helpers */
 
-    function _has(obj, property) {
-        return Object.prototype.hasOwnProperty.call(obj, property);
+    /* Remote Command Execution */
+
+    function _executeCommand(data) {
+        var name = data['name'];
+        var value = data['value'];
+        var record = _boundVariables[name];
+        if (record) {
+            // If this record has a reference and we have a value, inject the value
+            if (_has(record, 'ref') && value !== undefined) {
+                _inject(name, value);
+            }
+
+            // If we have a function for this record, run it, passing it the value
+            if (_has(record, 'fn')) {
+                record.fn.call(null, value);
+            }
+
+            // Confirm execution of this command
+            // _sendMessage()
+        }
     }
-
-    function _assert(value, message) {
-        function AssertionError(message) {
-            this.message = message;
-        }
-
-        AssertionError.prototype.toString = function() {
-            return 'AssertionError: ' + this.message;
-        }
-
-        var test = (value === true);
-        if (!test) {
-            throw new AssertionError(message);
-        }
-        return test;
-    }
-
-    
-    
-
-    
 
     /* Tweak API */
 
@@ -132,7 +123,7 @@
 
     function _createChainable(record) {
         return {
-            nameed: function (name) {
+            named: function (name) {
                 record.name = name;
                 delete this.aliased;
                 return this;
@@ -171,22 +162,63 @@
         };
     }
 
-    Tweak = function (property) {
+    var Tweak = function (property) {
+
+        // Establish connection if needed
+        if (!_ws) _initConnection();
+
+        // Create record for this bound variable and create a chainable object to build its properties
         var record = _createBindingRecord(property);
         var chainable = _createChainable(record);
+
+        // Save this record when the stack has cleared (i.e. after all the chainable's methods are done executing)
         setTimeout(function () {
             if (_assert(record.ref !== null || record.fn !== undefined, 'Tweak statement must specify one of either .in() or .do().')) {
                 record.name = record.name || record.property;
+                if (!record.ref) {
+                    delete record.ref;
+                } else {
+                    record.value = record.ref[record.property];
+                }
                 _boundVariables[record.name] = record;
             }
         }, 0);
+
         return chainable;
     };
 
     Tweak.config = function (options) {
-
+        if (_has(options, 'domain')) {
+            _config.domain = options.domain;
+        }
+        if (_has(options, 'port')) {
+            _config.port = options.port;
+        }
     };
 
-    window.Tweak = Tweak;
+    /* Helpers */
 
+    function _has(obj, property) {
+        return Object.prototype.hasOwnProperty.call(obj, property);
+    }
+
+    function _assert(value, message) {
+        function AssertionError(message) {
+            this.message = message;
+        }
+
+        AssertionError.prototype.toString = function() {
+            return 'AssertionError: ' + this.message;
+        }
+
+        var test = (value === true);
+        if (!test) {
+            throw new AssertionError(message);
+        }
+        return test;
+    }
+
+    /* Export */
+
+    window.Tweak = Tweak;
 })();
