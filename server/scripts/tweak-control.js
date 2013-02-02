@@ -25,6 +25,11 @@ $(window).unload(function(event) {
 function _receiveMessage(msg) {
     var data = JSON.parse(msg.data);
     console.log(data);
+
+    if (_has(data, 'binding')) {
+        _storeBindingRecord(data['binding']);
+        _renderBinding(data['binding']);
+    }
 }
 
 function _sendMessage(data) {
@@ -53,11 +58,15 @@ window.widgetEventDispatcher = _widgetEventDispatcher;
 
 /* Widget Rendering */
 
+var _renderedNodes = [];
 function _renderBinding(binding) {
     _getTemplateForType(binding.type)
         .done(function (template) {
-            var html = Mustache.render(template, binding);
-            $(html).appendTo('body');
+            var node = $(Mustache.render(template, binding));
+            _renderedNodes.push(node);
+
+            node.css('left', _renderedNodes.length * 30);
+            node.appendTo('body');
         });
 }
 
@@ -69,18 +78,11 @@ function _getTemplateForType(type) {
     });
 }
 
-$(function () {
+/* Helpers */
 
-    var binding = {
-        'type': 'int', 
-        'name': 'max',
-        'low': 0,
-        'high': 900,
-        'value': 600
-    };
-    _storeBindingRecord(binding);
-    _renderBinding(binding);
-});
+function _has(obj, property) {
+    return Object.prototype.hasOwnProperty.call(obj, property);
+}
 
 
 

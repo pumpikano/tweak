@@ -66,13 +66,13 @@
 
     function _createBindingRecord(property) {
         return {
-                 'name': null,
-                 'property': property,
-                 'ref': null,
-                 'high': 1,
-                 'low': 0,
-                 'type': 'real'
-            };
+            'name': null,
+            'property': property,
+            'ref': null,
+            'high': 1,
+            'low': 0,
+            'type': 'real'
+        };
     }
 
     function _packageBindingRecord(record) {
