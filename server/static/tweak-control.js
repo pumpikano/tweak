@@ -48,9 +48,26 @@ function sliderChange(slider) {
     });
 }
 
+function _getTemplate(type) {
+    return '<input type="range" name="{{name}}" min="{{low}}" max="{{high}}" value="{{value}}" onchange="sliderChange(this)">';
+}
 
+function _renderBinding(binding) {
+    var template = _getTemplate(binding.type);
+    var html = Mustache.render(template, binding);
+    $(html).appendTo('body');
+    // console.log(node);
+}
 
-
+$(function () {
+    _renderBinding({
+        'type': 'int', 
+        'name': 'max',
+        'low': 0,
+        'high': 900,
+        'value': 600
+    });
+});
 
 
 
