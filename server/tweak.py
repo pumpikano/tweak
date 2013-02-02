@@ -42,7 +42,7 @@ sync = Synchronizer()
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
-        self.write(open('./static/index.html', 'r').read())
+        self.write(open('./index.html', 'r').read())
 
 # WebSocket Routes #
 
@@ -76,7 +76,9 @@ static_path = os.path.join(os.getcwd(), 'static')
 
 application = tornado.web.Application([
     (r'/', MainHandler),
-    (r'/static/(.*)', tornado.web.StaticFileHandler, {'path': static_path}),
+    (r'/lib/(.*)', tornado.web.StaticFileHandler, {'path': os.path.join(os.getcwd(), 'lib')}),
+    (r'/scripts/(.*)', tornado.web.StaticFileHandler, {'path': os.path.join(os.getcwd(), 'scripts')}),
+    (r'/css/(.*)', tornado.web.StaticFileHandler, {'path': os.path.join(os.getcwd(), 'css')}),
     (r'/client', ClientWebSocket),
     (r'/control', ControlWebSocket)
 ], debug=True)
