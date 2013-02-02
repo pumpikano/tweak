@@ -19,15 +19,6 @@ if ('WebSocket' in window) {
 
 /* Communication */
 
-// var _messageBuffer = [];
-// function _onOpen() {
-//     _sendMessage({'event': {'type': 'startup'}});
-//     for (var i = 0; i < _messageBuffer.length; i++) {
-//         _sendMessage(_messageBuffer[i]);
-//     }
-//     _messageBuffer = [];
-// }
-
 function _receiveMessage(msg) {
     var data = JSON.parse(msg.data);
     console.log(data);

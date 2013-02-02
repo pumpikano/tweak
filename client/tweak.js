@@ -75,6 +75,25 @@
             };
     }
 
+    function _packageBindingRecord(record) {
+
+        var filter = {
+            'name': true,
+            'high': true,
+            'low': true,
+            'type': true
+        };
+
+        var package = {};
+        for (var key in record) {
+            if (_has(record, key) && _has(filter, key)) {
+                package[key] = record[key];
+            }
+        }
+
+        return package;
+    }
+
     function _inject(name, value) {
         var record = _boundVariables[name];
         record.ref[record.property] = value;
@@ -181,6 +200,9 @@
                     record.value = record.ref[record.property];
                 }
                 _boundVariables[record.name] = record;
+
+                var package = _packageBindingRecord(record);
+                _sendMessage({'binding': package});
             }
         }, 0);
 

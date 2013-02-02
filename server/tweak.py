@@ -8,6 +8,8 @@ class Synchronizer(object):
     def __init__(self):
         self.client_websocket = None
         self.control_websocket = None
+        self.client_bound_message_buffer = []
+        self.control_bound_message_buffer = []
 
     def set_client_websocket(self, client_ws):
         self.client_websocket = client_ws
@@ -16,18 +18,23 @@ class Synchronizer(object):
         self.control_websocket = control_ws
 
     def client_message(self, message):
-        print 'Client Message:'
-        print message
-        
+        # print 'Client Message:'
+        # print message
+
         if self.control_websocket:
             self.control_websocket.write_message(message)
+        else:
+            self.control_bound_message_buffer.append(message)
+
 
     def control_message(self, message):
-        print 'Control Message:'
-        print message
+        # print 'Control Message:'
+        # print message
 
         if self.client_websocket:
             self.client_websocket.write_message(message)
+        else:
+            self.client_bound_message_buffer.append(message)
 
 sync = Synchronizer()
 
