@@ -1,8 +1,16 @@
 import os
+import argparse
+from pprint import pprint
+
 import tornado.ioloop
 import tornado.web
 import tornado.websocket as websocket
 
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--verbose", help="print messages to console",
+                  action="store_true")
+args = parser.parse_args()
 
 class Synchronizer(object):
     def __init__(self):
@@ -18,8 +26,9 @@ class Synchronizer(object):
         self.control_websocket = control_ws
 
     def client_message(self, message):
-        # print 'Client Message:'
-        # print message
+        if args.verbose:
+            print 'Client Message:'
+            pprint(message)
 
         if self.control_websocket:
             self.control_websocket.write_message(message)
@@ -28,8 +37,9 @@ class Synchronizer(object):
 
 
     def control_message(self, message):
-        # print 'Control Message:'
-        # print message
+        if args.verbose:
+            print 'Control Message:'
+            pprint(message)
 
         if self.client_websocket:
             self.client_websocket.write_message(message)
