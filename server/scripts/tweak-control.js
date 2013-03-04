@@ -24,10 +24,17 @@ $(window).unload(function(event) {
 
 function _receiveMessage(msg) {
     var data = JSON.parse(msg.data);
-
+    console.log(data);
     if (_has(data, 'binding')) {
         _storeBindingRecord(data['binding']);
         _renderBinding(data['binding']);
+    } else if (_has(data, 'event')) {
+        if (data['event']['type'] === 'startup') {
+            console.log(_renderedNodes);
+            $.each(_renderedNodes, function (name, node) {
+                node.remove();
+            });
+        }
     }
 }
 
@@ -62,15 +69,16 @@ window.registerRenderer = function (fnRenderer) {
     currentRenderer = fnRenderer;
 };
 
-var _renderedNodes = [];
+var _renderedNodes = {};
 function _renderBinding(binding) {
     $.getScript('widgets/' + binding.type + '.js',
         function (script, textStatus) {
             var controlElem = $(currentRenderer.call(null, binding));
-            $('<div class="control-wrap"></div>')
+            var node = $('<div class="control-wrap"></div>')
                 .css('border-color', _colorForName(binding.name))
                 .append(controlElem)
                 .appendTo('body');
+            _renderedNodes[binding.name] = node;
         });
 }
 
