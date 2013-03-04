@@ -1,5 +1,5 @@
 var _config = {
-    domain: '0.0.0.0',
+    domain: window.location.hostname || '0.0.0.0',
     port: '8888'
 };
 
