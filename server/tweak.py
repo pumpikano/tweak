@@ -18,6 +18,7 @@ class Synchronizer(object):
         self.control_websocket = None
         self.client_bound_message_buffer = []
         self.control_bound_message_buffer = []
+        self.bindings = {}
 
     def set_client_websocket(self, client_ws):
         self.client_websocket = client_ws
@@ -29,6 +30,11 @@ class Synchronizer(object):
         if args.verbose:
             print 'Client Message:'
             pprint(message)
+
+        # Store/update the binding with this name
+        # if 'binding' in message:
+        #     binding = message['binding']
+        #     self.bindings[binding['name']] = binding
 
         if self.control_websocket:
             self.control_websocket.write_message(message)
@@ -90,6 +96,7 @@ application = tornado.web.Application([
     (r'/scripts/(.*)', tornado.web.StaticFileHandler, {'path': os.path.join(os.getcwd(), 'scripts')}),
     (r'/css/(.*)', tornado.web.StaticFileHandler, {'path': os.path.join(os.getcwd(), 'css')}),
     (r'/templates/(.*)', tornado.web.StaticFileHandler, {'path': os.path.join(os.getcwd(), 'templates')}),
+    (r'/widgets/(.*)', tornado.web.StaticFileHandler, {'path': os.path.join(os.getcwd(), 'widgets')}),
     (r'/client', ClientWebSocket),
     (r'/control', ControlWebSocket)
 ], debug=True)

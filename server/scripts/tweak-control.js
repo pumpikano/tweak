@@ -46,36 +46,30 @@ function _storeBindingRecord(record) {
 
 /* Interaction */
 
-function _widgetEventDispatcher(event) {
+function _setValue(name, value) {
     _sendMessage({
         'command': {
-            'name': event.name,
-            'value': event.value
+            'name': name,
+            'value': value
         }
     });
 }
-window.widgetEventDispatcher = _widgetEventDispatcher;
+window.setValue = _setValue;
 
 /* Widget Rendering */
 
+var currentRenderer;
+window.registerRenderer = function (fnRenderer) {
+    currentRenderer = fnRenderer;
+};
+
 var _renderedNodes = [];
 function _renderBinding(binding) {
-    _getTemplateForType(binding.type)
-        .done(function (template) {
-            var node = $(Mustache.render(template, binding));
-            _renderedNodes.push(node);
-
-            node.css('left', _renderedNodes.length * 30);
-            node.appendTo('body');
+    $.getScript('widgets/' + binding.type + '.js',
+        function (script, textStatus) {
+            $(currentRenderer.call(null, binding))
+                .appendTo('body');
         });
-}
-
-function _getTemplateForType(type) {
-    return $.ajax({
-        url: 'http://' + _config.domain + ':' + _config.port + '/templates/' + type + '.html',
-        dataType: 'html',
-        type: 'get'
-    });
 }
 
 /* Helpers */

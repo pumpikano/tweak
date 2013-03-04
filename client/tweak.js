@@ -69,18 +69,19 @@
             'name': null,
             'property': property,
             'ref': null,
-            'high': 1,
-            'low': 0,
+            'max': 1,
+            'min': 0,
             'type': 'real'
         };
     }
 
     function _packageBindingRecord(record) {
 
+        // Filter binding values
         var filter = {
             'name': true,
-            'high': true,
-            'low': true,
+            'max': true,
+            'min': true,
             'type': true
         };
 
@@ -89,6 +90,12 @@
             if (_has(record, key) && _has(filter, key)) {
                 package[key] = record[key];
             }
+        }
+
+        // Add current value if there is one
+        var value = record.ref[record.property];
+        if (value !== undefined && value !== null) {
+            package['value'] = value;
         }
 
         return package;
@@ -154,9 +161,9 @@
                 delete this.in;
                 return this;
             },
-            within: function (low, high) {
-                record.low = low;
-                record.high = high;
+            within: function (min, max) {
+                record.min = min;
+                record.max = max;
                 delete this.within;
                 return this;
             },
@@ -164,11 +171,11 @@
                 record.type = _normalizeType(type);
                 if (type === 'bool') {
                     delete this.within;
-                    delete record.low;
-                    delete record.high;
+                    delete record.min;
+                    delete record.max;
                 } else if (record.type === 'int' && _has(this, 'within')) {
-                    record.low = 0;
-                    record.high = 100;
+                    record.min = 0;
+                    record.max = 100;
                 }
                 delete this.as;
                 return this;
