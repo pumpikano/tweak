@@ -24,7 +24,6 @@ $(window).unload(function(event) {
 
 function _receiveMessage(msg) {
     var data = JSON.parse(msg.data);
-    console.log(data);
 
     if (_has(data, 'binding')) {
         _storeBindingRecord(data['binding']);
@@ -67,11 +66,44 @@ var _renderedNodes = [];
 function _renderBinding(binding) {
     $.getScript('widgets/' + binding.type + '.js',
         function (script, textStatus) {
-            $(currentRenderer.call(null, binding))
+            var controlElem = $(currentRenderer.call(null, binding));
+            $('<div class="control-wrap"></div>')
+                .css('border-color', _colorForName(binding.name))
+                .append(controlElem)
                 .appendTo('body');
         });
 }
 
+var colors = [
+    '#B0171F',
+    '#FF69B4',
+    '#8B7B8B',
+    '#9B30FF',
+    '#3D59AB',
+    '#5CACEE',
+    '#8EE5EE',
+    '#528B8B',
+    '#43CD80',
+    '#008000',
+    '#EEEED1',
+    '#E3CF57',
+    '#F5DEB3',
+    '#8B7355',
+    '#8B8682',
+    '#8B2500',
+    '#BC8F8F',
+    '#800000',
+    '#C0C0C0',
+    '#C9C9C9'
+];
+
+function _colorForName(name) {
+    var memo = 0;
+    for (var i = 0; i < name.length; i++) {
+        memo += name.charCodeAt(i);
+    }
+    return colors[memo % colors.length];
+}
 /* Helpers */
 
 function _has(obj, property) {
