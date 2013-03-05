@@ -12,7 +12,9 @@ registerRenderer(function (binding) {
             min: binding.min * resolutionFactor,
             max: binding.max * resolutionFactor,
             step: 1,
-            value: binding.value * resolutionFactor,
+            value: (binding.value !== undefined) ?
+                    binding.value * resolutionFactor :
+                    binding.min * resolutionFactor,
             slide: function (event, ui) {
                 var value = ui.value / resolutionFactor;
                 name.html(binding.name + ': ' + value);

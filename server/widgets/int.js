@@ -10,7 +10,8 @@ registerRenderer(function (binding) {
             min: binding.min,
             max: binding.max,
             step: 1,
-            value: binding.value,
+            value: (binding.value !== undefined) ?
+                    binding.value : binding.min,
             slide: function (event, ui) {
                 name.html(binding.name + ': ' + ui.value);
                 setValue(binding.name, ui.value);
