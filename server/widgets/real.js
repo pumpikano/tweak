@@ -6,7 +6,7 @@ registerRenderer(function (binding) {
     var control = $('<div class="bound-control type-int" id="' + binding.name + '"></div>')
         .css('margin', 10);
 
-    var name = $('<div>' + binding.name + '</div>');
+    var name = $('<div>' + binding.name + ': ' + binding.value + '</div>');
     var slider = $('<div></div>')
         .slider({
             min: binding.min * resolutionFactor,
@@ -14,7 +14,9 @@ registerRenderer(function (binding) {
             step: 1,
             value: binding.value * resolutionFactor,
             slide: function (event, ui) {
-                setValue(binding.name, ui.value / resolutionFactor);
+                var value = ui.value / resolutionFactor;
+                name.html(binding.name + ': ' + value);
+                setValue(binding.name, value);
             }
         });
     control.append(name).append(slider);
