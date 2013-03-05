@@ -93,9 +93,11 @@
         }
 
         // Add current value if there is one
-        var value = record.ref[record.property];
-        if (value !== undefined && value !== null) {
-            package['value'] = value;
+        if (record.ref) {
+            var value = record.ref[record.property];
+            if (value !== undefined && value !== null) {
+                package['value'] = value;
+            }
         }
 
         return package;
