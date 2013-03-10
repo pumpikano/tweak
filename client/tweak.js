@@ -21,8 +21,8 @@
         }
     }
     
-    $(window).unload(function(event) {
-        _ws.close();
+    window.addEventListener('unload', function () {
+        if (_ws) _ws.close();
     });
 
     /* Communication */
