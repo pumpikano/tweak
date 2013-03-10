@@ -78,4 +78,8 @@ Tweak('step').in(animationParameters).as('int').within(0, 100);
 after the `animationParameters` declaration. After starting the server, `python tweak.py`,
 and loading the client page, a slider will be bound to the value of `step` on `http://localhost:8888`:
 
+References
+----------
 
+One of the first explorations in this sort of dev tool is [Juxtapose](http://hci.stanford.edu/research/juxtapose/),
+the paper for which can be found [here](http://hci.stanford.edu/publications/2008/juxtapose/juxtapose-uist2008.pdf).
