@@ -153,7 +153,7 @@
         return {
             named: function (name) {
                 record.name = name;
-                delete this.aliased;
+                delete this.named;
                 return this;
             },
             in: function (ref) {
